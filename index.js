@@ -4,6 +4,7 @@ const fs = require('fs');
 const puppeteer = require('puppeteer');
 const path = require('path');
 const htmlCode = require('./htmlCode.js');
+const { exec } = require('child_process');
 console.log(`  ___  _                                                                                                     
 |_ _|| |_     ___   __ _  _ __ ___                                                                          
  | | | __|   / _ \\ / _\` || '_ \` _ \\                                                                         
@@ -95,7 +96,7 @@ const WriteUrlAndSubdomains = async () => {
       const screenshotDir = `./screenshots`;
       const responseDir = './response';
       const htmlDir = './html';
-      const jsonResponseHTML = './html/response.json';
+      const jsonResponseHTML = 'db.json';
       const urls = txtFileContent
         .split('\n')
         .filter((url) => url.trim() !== '');
@@ -115,7 +116,9 @@ const WriteUrlAndSubdomains = async () => {
       if (!fs.existsSync(responseDir)) {
         fs.mkdirSync(responseDir);
       }
-      const responses = [];
+      const responses = {
+        all: [],
+      };
 
       for (let url of urls) {
         try {
@@ -151,7 +154,7 @@ const WriteUrlAndSubdomains = async () => {
             screenshotPath: `../${screenshotPath}`,
           };
 
-          responses.push(responseObj);
+          responses.all.push(responseObj);
           if (
             statusCode.status() === 200 ||
             statusCode.status() === 301 ||
@@ -182,7 +185,50 @@ const WriteUrlAndSubdomains = async () => {
 
       fs.writeFileSync(path.join(htmlDir, 'index.html'), ` ${htmlCode}`);
       await browser.close();
-      operation();
+
+      const killPort = (port) => {
+        exec(`kill-port ${port}`, (error, stdout, stderr) => {
+          if (error) {
+            console.error(
+              `Erro ao encerrar processos na porta ${port}: ${error.message}`,
+            );
+            return;
+          }
+          if (stderr) {
+            console.error(
+              `Erro ao encerrar processos na porta ${port}: ${stderr}`,
+            );
+            return;
+          }
+          console.log(`Processos na porta ${port} encerrados com sucesso.`);
+        });
+      };
+
+      const porta = 3000;
+      killPort(porta);
+
+      const subirServer = (comando) => {
+        exec(comando, (error, stdout, stderr) => {
+          if (error) {
+            console.error(`Erro : ${error.message}`);
+            return;
+          }
+          if (stderr) {
+            console.error(`Erro : ${stderr}`);
+            return;
+          }
+          console.log({ stdout });
+        });
+      };
+
+      const subirServerComando = 'npm run server';
+      subirServer(subirServerComando);
+
+      console.log(
+        chalk.bgGreen.white(
+          'WEBSERVER ONLINE! ABRA O ARQUIVO INDEX.HTML EM ./html/index.html  🚀',
+        ),
+      );
     })
     .catch((error) => console.log(error));
 };

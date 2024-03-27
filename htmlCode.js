@@ -61,6 +61,7 @@ let htmlCode = `<!DOCTYPE html>
                align-items: center;
                flex-wrap: wrap;
                gap: 50px;
+               padding: 25px
           }
 
           .container__response {
@@ -124,25 +125,32 @@ let htmlCode = `<!DOCTYPE html>
      </div>
      <div id="root"></div>
      <script>
-          const data = ${JSON.stringify(require('./html/response.json'))};
-
           const root = document.getElementById('root');
 
-          data.forEach(item => {
-               const div = document.createElement('div');
-               div.classList.add('container__response');
-               div.innerHTML = \`
-               <img src="\${item.screenshotPath}" alt="Screenshot">
-               <div class="container__response__text">
-                    <a href="\${item.url}">\${item.url}</a>
-                    <h1>[\${item.statusCode}]</h1>
-               </div>
-               \`;
-               div.addEventListener('click', () => {
-                    root.innerHTML = '';
-               });
-               root.appendChild(div);
-          });
+               const requestServer  = async() => {
+                    const response = await fetch('http://localhost:3000/all');
+                    try {
+                         const data = await response.json();
+                         data.forEach(item => {
+                              const div = document.createElement('div');
+                              div.classList.add('container__response');
+                              div.innerHTML = \`
+                              <img src="\${item.screenshotPath}" alt="Screenshot">
+                              <div class="container__response__text">
+                                   <a target="_blank" href="\${item.url}">\${item.url}</a>
+                                   <h1>[\${item.statusCode}]</h1>
+                              </div>
+                              \`;
+                              div.addEventListener('click', () => {
+                                   root.innerHTML = '';
+                              });
+                              root.appendChild(div);
+                         });
+                    }catch(error) {
+                         console.log(error)
+                    }
+               }
+               requestServer()
      </script>
 </body>
 </html>`;

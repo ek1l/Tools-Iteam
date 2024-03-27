@@ -23,7 +23,7 @@ let htmlCode = `<!DOCTYPE html>
                display: flex;
                align-items: center;
                justify-content: flex-start;
-               background: black;
+               background: white;
                color: white;
                flex-direction: column;
                gap: 70px;
@@ -75,7 +75,6 @@ let htmlCode = `<!DOCTYPE html>
                justify-content: center;
                gap: 20px;
           }
-
           .container__response h1,
           a {
                color: white;
@@ -109,6 +108,10 @@ let htmlCode = `<!DOCTYPE html>
                flex-direction: row-reverse;
                gap: 20px;
           }
+    .url_subdomains_title {
+        color: black;
+        font-weight: 700;
+    }
      </style>
 </head>
 
@@ -116,17 +119,17 @@ let htmlCode = `<!DOCTYPE html>
      <div class="titleAndLogo">
           <img src="https://it-eam.com/wp-content/uploads/2016/12/Logo-iT.eam_.png" alt="Logo Iteam">
           <h1 class="red-team">RED TEAM TOOLS</h1>
-          <h1>URL / SUBDOMAINS VALIDATOR</h1>
+          <h1 class="url_subdomains_title">URL / SUBDOMAINS VALIDATOR</h1>
      </div>
      <div id="root"></div>
      <script>
-          const req = () => {
-               fetch('./response.json')
+          const req = async  () => {
+             await fetch('./response.json')
                     .then(response => {
                          if (!response.ok) {
                               throw new Error('Erro ao carregar o JSON');
                          }
-                         return response.json();
+                         return await response.json();
                     })
                     .then(data => {
                          const root = document.getElementById('root');

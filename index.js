@@ -200,7 +200,9 @@ const WriteUrlAndSubdomains = async () => {
             );
             return;
           }
-          console.log(`Processos na porta ${port} encerrados com sucesso.`);
+          console.log(
+            `Processos na porta ${port} encerrados com sucesso.\r\n SERVIDOR ABERTO EM http://localhost:${port}`,
+          );
         });
       };
 

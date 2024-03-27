@@ -60,7 +60,7 @@ let htmlCode = `<!DOCTYPE html>
                justify-content: center;
                align-items: center;
                flex-wrap: wrap;
-               gap:50px;
+               gap: 50px;
           }
 
           .container__response {
@@ -75,6 +75,7 @@ let htmlCode = `<!DOCTYPE html>
                justify-content: center;
                gap: 20px;
           }
+
           .container__response h1,
           a {
                color: white;
@@ -108,10 +109,10 @@ let htmlCode = `<!DOCTYPE html>
                flex-direction: row-reverse;
                gap: 20px;
           }
-    .url_subdomains_title {
-        color: black;
-        font-weight: 700;
-    }
+          .url_subdomains_title {
+               color: black;
+               font-weight: 700;
+          }
      </style>
 </head>
 
@@ -123,38 +124,22 @@ let htmlCode = `<!DOCTYPE html>
      </div>
      <div id="root"></div>
      <script>
-          const req = async  () => {
-             await fetch('./response.json')
-                    .then(response => {
-                         if (!response.ok) {
-                              throw new Error('Erro ao carregar o JSON');
-                         }
-                         return await response.json();
-                    })
-                    .then(data => {
-                         const root = document.getElementById('root');
+          const data = ${JSON.stringify(require('./html/response.json'))};
 
-                         data.forEach(item => {
-                              const div = document.createElement('div');
-                              div.classList.add('container__response');
-                              div.innerHTML = \`
-                              <img src="\${item.screenshotPath}" alt="Screenshot">
-                              <div class="container__response__text">
-                                   <a href="\${item.url}">\${item.url}</a>
-                                   <h1>[\${item.statusCode}]</h1>
-                              </div>
-                         
+          const root = document.getElementById('root');
 
-                              \`;
-                              root.appendChild(div);
-                         });
-
-                    })
-                    .catch(error => {
-                         console.error('Erro ao carregar o JSON:', error);
-                    });
-          }
-          req();
+          data.forEach(item => {
+               const div = document.createElement('div');
+               div.classList.add('container__response');
+               div.innerHTML = \`
+               <img src="\${item.screenshotPath}" alt="Screenshot">
+               <div class="container__response__text">
+                    <a href="\${item.url}">\${item.url}</a>
+                    <h1>[\${item.statusCode}]</h1>
+               </div>
+               \`;
+               root.appendChild(div);
+          });
      </script>
 </body>
 </html>`;

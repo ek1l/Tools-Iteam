@@ -3,7 +3,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const path = require('path');
-
+const htmlCode = require('./htmlCode.js');
 console.log(`  ___  _                                                                                                     
 |_ _|| |_     ___   __ _  _ __ ___                                                                          
  | | | __|   / _ \\ / _\` || '_ \` _ \\                                                                         
@@ -70,12 +70,14 @@ const WriteUrlAndSubdomains = async () => {
         operation();
         return;
       }
+
       if (!fs.existsSync(`./${txtFile}.txt`)) {
         console.log(chalk.bgRed.black('O arquivo não existe.'));
         console.log(chalk.bgRed.black('Caso queira voltar digite back.'));
         WriteUrlAndSubdomains();
         return;
       }
+
       const txtFileContent = fs.readFileSync(`./${txtFile}.txt`, {
         encoding: 'utf8',
         flag: 'r',
@@ -87,32 +89,54 @@ const WriteUrlAndSubdomains = async () => {
         WriteUrlAndSubdomains();
         return;
       }
+
       const browser = await puppeteer.launch();
       const page = await browser.newPage();
-
-      const urls = txtFileContent.split('\n');
       const screenshotDir = `./screenshots`;
+      const responseDir = './response';
+      const htmlDir = './html';
+      const jsonResponseHTML = './html/response.json';
+      const urls = txtFileContent
+        .split('\n')
+        .filter((url) => url.trim() !== '');
+
+      if (fs.existsSync(screenshotDir)) {
+        fs.rmSync(screenshotDir, { recursive: true });
+      }
+
+      if (fs.existsSync(responseDir)) {
+        fs.rmSync(responseDir, { recursive: true });
+      }
 
       if (!fs.existsSync(screenshotDir)) {
         fs.mkdirSync(screenshotDir);
       }
 
-      const responseDir = './response';
       if (!fs.existsSync(responseDir)) {
         fs.mkdirSync(responseDir);
       }
+      const responses = [];
 
       for (let url of urls) {
         try {
-          await page.goto(url);
+          const statusCode = await page.goto(url, {
+            waitUntil: 'networkidle0',
+            timeout: 15000,
+          });
+          const screenshotFileName = `${url
+            .replace(/[^a-z0-9]/gi, '_')
+            .toLowerCase()}.png`;
+          const screenshotPath = path
+            .join(screenshotDir, screenshotFileName)
+            .replace(/\\/g, '/');
+
           await page.screenshot({
-            path: `screenshots/${url
-              .replace(/[^a-z0-9]/gi, '_')
-              .toLowerCase()}.png`,
+            path: screenshotPath,
           });
           const response = await page.evaluate(
             () => document.documentElement.outerHTML,
           );
+
           fs.writeFileSync(
             path.join(
               responseDir,
@@ -120,19 +144,45 @@ const WriteUrlAndSubdomains = async () => {
             ),
             JSON.stringify(response),
           );
+
+          const responseObj = {
+            url,
+            statusCode: statusCode.status(),
+            screenshotPath: `../${screenshotPath}`,
+          };
+
+          responses.push(responseObj);
+          if (
+            statusCode.status() === 200 ||
+            statusCode.status() === 301 ||
+            statusCode.status() === 302 ||
+            statusCode.status() === 303 ||
+            statusCode.status() === 307 ||
+            statusCode.status() === 308 ||
+            statusCode.status() === 403 ||
+            statusCode.status() === 401 ||
+            statusCode.status() === 405
+          ) {
+            console.log(chalk.bgGreen.black(`[${statusCode.status()}] ${url}`));
+          }
         } catch (error) {
-          console.log(
-            chalk.bgRed.black('Ocorreu um erro ao acessar a URL: ', url),
-          );
+          console.log(chalk.bgRed.black(`[ERRO] ${url}`));
         }
       }
+
+      if (fs.existsSync(htmlDir)) {
+        fs.rmSync(htmlDir, { recursive: true });
+      }
+
+      if (!fs.existsSync(htmlDir)) {
+        fs.mkdirSync(htmlDir);
+      }
+
+      fs.writeFileSync(jsonResponseHTML, JSON.stringify(responses));
+
+      fs.writeFileSync(path.join(htmlDir, 'index.html'), ` ${htmlCode}`);
       await browser.close();
-      console.log(
-        chalk.bgGreen.black('Todos os arquivos foram criados com sucesso!'),
-      );
       operation();
     })
     .catch((error) => console.log(error));
 };
-
- 

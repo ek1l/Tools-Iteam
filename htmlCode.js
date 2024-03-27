@@ -138,6 +138,9 @@ let htmlCode = `<!DOCTYPE html>
                     <h1>[\${item.statusCode}]</h1>
                </div>
                \`;
+               div.addEventListener('click', () => {
+                    root.innerHTML = '';
+               });
                root.appendChild(div);
           });
      </script>

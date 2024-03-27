@@ -225,8 +225,8 @@ const WriteUrlAndSubdomains = async () => {
       subirServer(subirServerComando);
 
       console.log(
-        chalk.bgGreen.white(
-          'WEBSERVER ONLINE! ABRA O ARQUIVO INDEX.HTML EM ./html/index.html  🚀',
+        chalk.bgBlack.white(
+          'WEBSERVER ONLINE! ABRA O ARQUIVO INDEX.HTML EM ./html/index.html PARA CONFERIR OS DETALHES DA BUSCA 🚀',
         ),
       );
     })

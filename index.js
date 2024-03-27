@@ -201,7 +201,11 @@ const WriteUrlAndSubdomains = async () => {
             return;
           }
           console.log(
-            `Processos na porta ${port} encerrados com sucesso.\r\n SERVIDOR ABERTO EM http://localhost:${port}`,
+            `Processos na porta ${port} encerrados com sucesso.\r\n SERVIDOR ABERTO EM http://localhost:${port}
+            ${chalk.bgYellow.black(
+              'SE O SERVIDOR CAIR  OU  O TERMINAL FOR FECHADO ENTRE NESTE MESMO DIRETORIO E DIGITE "npm run server"',
+            )}
+            `,
           );
         });
       };

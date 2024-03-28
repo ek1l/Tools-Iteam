@@ -1,5 +1,1 @@
-http://google.com
-http://nmap.org
 http://businesscorp.com.br
-https://www.example.com
-https://www.youtube.com/

@@ -126,6 +126,19 @@ const WriteUrlAndSubdomains = async () => {
             waitUntil: 'networkidle0',
             timeout: 15000,
           });
+          if (
+            statusCode.status() === 200 ||
+            statusCode.status() === 301 ||
+            statusCode.status() === 302 ||
+            statusCode.status() === 303 ||
+            statusCode.status() === 307 ||
+            statusCode.status() === 308 ||
+            statusCode.status() === 403 ||
+            statusCode.status() === 401 ||
+            statusCode.status() === 405
+          ) {
+            console.log(chalk.bgGreen.black(`[${statusCode.status()}] ${url}`));
+          }
           const screenshotFileName = `${url
             .replace(/[^a-z0-9]/gi, '_')
             .toLowerCase()}.png`;
@@ -148,26 +161,62 @@ const WriteUrlAndSubdomains = async () => {
             JSON.stringify(response),
           );
 
+          const waybackResponse = async (url) => {
+            try {
+              let urlHost = `https://web.archive.org/web/timemap/json?url=https%3A%2F%2F${url}&matchType=prefix&collapse=urlkey&output=json&fl=original%2Cmimetype%2Ctimestamp%2Cendtimestamp%2Cgroupcount%2Cuniqcount&filter=!statuscode%3A%5B45%5D..&limit=10000&_=1711579879466`;
+              const response = await fetch(urlHost);
+              const data = await response.json();
+              return data.slice(1).map((entry) => entry[0]);
+            } catch (error) {
+              console.log('Erro ao buscar dados na API Wayback', error);
+              return [];
+            }
+          };
+          const waybackResponsesPromises = urls.map((url) =>
+            waybackResponse(url),
+          );
+
+          const waybackResponses = await Promise.all(waybackResponsesPromises);
+
+          const validatedUrls = [];
+          console.log(chalk.bgYellow.black.bold(`Validando URLs WAYBACK...`));
+          for (const waybackUrl of waybackResponses[0]) {
+            try {
+              const waybackResponse = await fetch(waybackUrl);
+              if (
+                waybackResponse.status === 200 ||
+                waybackResponse.status === 301 ||
+                waybackResponse.status === 302 ||
+                waybackResponse.status === 303 ||
+                waybackResponse.status === 307 ||
+                waybackResponse.status === 308
+              ) {
+                console.log(
+                  chalk.bgGreen.black(
+                    `[${waybackResponse.status}] ${waybackUrl}`,
+                  ),
+                );
+                validatedUrls.push(waybackUrl);
+              } else {
+                console.log(
+                  chalk.bgRed.black(
+                    `[${waybackResponse.status}] ${waybackUrl}`,
+                  ),
+                );
+              }
+            } catch (error) {
+              console.error('Erro ao validar URL WAYBACK:', waybackUrl, error);
+            }
+          }
+
           const responseObj = {
             url,
             statusCode: statusCode.status(),
             screenshotPath: `../${screenshotPath}`,
+            waybackResponses: validatedUrls,
+            waybackResponsesAll: waybackResponses[0],
           };
-
           responses.all.push(responseObj);
-          if (
-            statusCode.status() === 200 ||
-            statusCode.status() === 301 ||
-            statusCode.status() === 302 ||
-            statusCode.status() === 303 ||
-            statusCode.status() === 307 ||
-            statusCode.status() === 308 ||
-            statusCode.status() === 403 ||
-            statusCode.status() === 401 ||
-            statusCode.status() === 405
-          ) {
-            console.log(chalk.bgGreen.black(`[${statusCode.status()}] ${url}`));
-          }
         } catch (error) {
           console.log(chalk.bgRed.black(`[ERRO] ${url}`));
         }

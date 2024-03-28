@@ -79,7 +79,7 @@ let htmlCode = `<!DOCTYPE html>
 
           .container__response h1,
           a {
-               color: white;
+               color: black;
                font-size: 20px;
                font-weight: 500;
                transition: 0.3s;
@@ -110,16 +110,60 @@ let htmlCode = `<!DOCTYPE html>
                flex-direction: row-reverse;
                gap: 20px;
           }
+
           .url_subdomains_title {
                color: black;
                font-weight: 700;
+          }
+
+          h1 {
+               color: black;
+          }
+
+          .container_single_response {
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               width: 100%;
+               height: 100%;
+               flex-direction: row-reverse;
+               gap: 20px;
+
+          }
+
+          .container_single_response_img {
+               width: 1000px;
+               height: 700px;
+               object-fit: cover;
+               border-radius: 10px;
+               opacity: 0.9;
+               transition: 0.3s;
+
+          }
+
+          .container_single_response_img:hover {
+               opacity: 1;
+          }
+
+          .container_wayback {
+               width: 100%;
+               height: 500px;
+               overflow: scroll;
+               display: flex;
+               align-items: flex-start;
+               justify-content: flex-start;
+               flex-direction: column;
+               border: 10px solid black;
+               padding: 10px;
+               border-radius: 10px;
+               gap: 20px;
           }
      </style>
 </head>
 
 <body>
      <div class="titleAndLogo">
-          <img src="https://it-eam.com/wp-content/uploads/2016/12/Logo-iT.eam_.png" alt="Logo Iteam">
+          <a href="./index.html"><img src="https://it-eam.com/wp-content/uploads/2016/12/Logo-iT.eam_.png" alt="Logo Iteam"></a>
           <h1 class="red-team">RED TEAM TOOLS</h1>
           <h1 class="url_subdomains_title">URL / SUBDOMAINS VALIDATOR</h1>
      </div>
@@ -127,32 +171,54 @@ let htmlCode = `<!DOCTYPE html>
      <script>
           const root = document.getElementById('root');
 
-               const requestServer  = async() => {
-                    const response = await fetch('http://localhost:3000/all');
-                    try {
-                         const data = await response.json();
-                         data.forEach(item => {
-                              const div = document.createElement('div');
-                              div.classList.add('container__response');
-                              div.innerHTML = \`
-                              <img src="\${item.screenshotPath}" alt="Screenshot">
-                              <div class="container__response__text">
-                                   <a target="_blank" href="\${item.url}">\${item.url}</a>
-                                   <h1>[\${item.statusCode}]</h1>
+          const requestServer = async () => {
+               const response = await fetch('http://localhost:3000/all');
+               try {
+                    const data = await response.json();
+                    data.forEach((item, index) => {
+                         const div = document.createElement('div');
+                         div.classList.add('container__response');
+                         div.setAttribute('data-index', index);
+                         div.innerHTML = \`
+                              <img data-index="\${index}"  src="\${item.screenshotPath}" alt="Screenshot">
+                              <div data-index="\${index}" class="container__response__text">
+                                   <a data-index="\${index}" target="_blank" href="\${item.url}">\${item.url}</a>
+                                   <h1 data-index="\${index}">[\${item.statusCode}]</h1>
                               </div>
                               \`;
-                              div.addEventListener('click', () => {
-                                   root.innerHTML = '';
-                              });
-                              root.appendChild(div);
-                         });
-                    }catch(error) {
-                         console.log(error)
-                    }
+                         div.addEventListener('click', (event) => {
+                              const index = event.target.getAttribute('data-index');
+                              root.innerHTML = '';
+                              root.innerHTML = \`
+                              <img class="container_single_response_img" src="\${data[index].screenshotPath}" alt="Screenshot">
+                              <div class="container_single_response">
+                                   <a target="_blank" href="\${data[index].url}">\${data[index].url}</a>
+                                   <h1 class="url_subdomains_title">[\${data[index].statusCode}]</h1>
+                               
+                              </div>
+                              <div class="container_wayback"> 
+                                  <div class="title_waybackLinks">
+                                    <h1>Wayback LINKS</h1>
+                                    </div>
+                              </div> 
+                              \`
+                              data[index].waybackResponses.forEach((url) => {
+                                   const containerWayback = document.querySelector('.container_wayback');
+                                   containerWayback.innerHTML += \`
+                                   <a target="_blank" href="\${url}">\${url}</a>
+                                  \`
+                              })
+                         })
+                         root.appendChild(div);
+                    });
+               } catch (error) {
+                    console.log(error)
                }
-               requestServer()
+          }
+          requestServer()
      </script>
 </body>
+
 </html>`;
 
 module.exports = htmlCode;

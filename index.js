@@ -172,15 +172,13 @@ const WriteUrlAndSubdomains = async () => {
               return [];
             }
           };
-          const waybackResponsesPromises = urls.map((url) =>
-            waybackResponse(url),
-          );
 
-          const waybackResponses = await Promise.all(waybackResponsesPromises);
+          let waybackResponses = await waybackResponse(url);
 
           const validatedUrls = [];
+          const errorLinksArray = [];
           console.log(chalk.bgYellow.black.bold(`Validando URLs WAYBACK...`));
-          for (const waybackUrl of waybackResponses[0]) {
+          for (const waybackUrl of waybackResponses) {
             try {
               const waybackResponse = await fetch(waybackUrl);
               if (
@@ -189,7 +187,8 @@ const WriteUrlAndSubdomains = async () => {
                 waybackResponse.status === 302 ||
                 waybackResponse.status === 303 ||
                 waybackResponse.status === 307 ||
-                waybackResponse.status === 308
+                waybackResponse.status === 308 ||
+                waybackResponse.status === 202
               ) {
                 console.log(
                   chalk.bgGreen.black(
@@ -203,6 +202,7 @@ const WriteUrlAndSubdomains = async () => {
                     `[${waybackResponse.status}] ${waybackUrl}`,
                   ),
                 );
+                errorLinksArray.push(waybackUrl);
               }
             } catch (error) {
               console.error('Erro ao validar URL WAYBACK:', waybackUrl, error);
@@ -214,7 +214,7 @@ const WriteUrlAndSubdomains = async () => {
             statusCode: statusCode.status(),
             screenshotPath: `../${screenshotPath}`,
             waybackResponses: validatedUrls,
-            waybackResponsesAll: waybackResponses[0],
+            errorLinks: errorLinksArray,
           };
           responses.all.push(responseObj);
         } catch (error) {
@@ -236,7 +236,7 @@ const WriteUrlAndSubdomains = async () => {
       await browser.close();
 
       const killPort = (port) => {
-        exec(`kill-port ${port}`, (error, stdout, stderr) => {
+        exec(`kill-port ${port}`, (error, _, stderr) => {
           if (error) {
             console.error(
               `Erro ao encerrar processos na porta ${port}: ${error.message}`,

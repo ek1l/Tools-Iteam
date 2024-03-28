@@ -24,12 +24,12 @@ const operation = () => {
         type: 'list',
         name: 'action',
         message: 'O que deseja fazer?',
-        choices: ['Validar URL/SUBDOMAINS', 'Sair'],
+        choices: ['OSINT', 'Sair'],
       },
     ])
     .then((answer) => {
       const action = answer['action'];
-      if (action === 'Validar URL/SUBDOMAINS') {
+      if (action === 'OSINT') {
         urlAndSubDomainsValidator();
       } else if (action === 'Sair') {
         console.log(chalk.bgBlue.black('Saindo...'));
@@ -97,6 +97,7 @@ const WriteUrlAndSubdomains = async () => {
       const responseDir = './response';
       const htmlDir = './html';
       const jsonResponseHTML = 'db.json';
+      const wordlist = './wl.txt';
       const urls = txtFileContent
         .split('\n')
         .filter((url) => url.trim() !== '');
@@ -137,7 +138,9 @@ const WriteUrlAndSubdomains = async () => {
             statusCode.status() === 401 ||
             statusCode.status() === 405
           ) {
-            console.log(chalk.bgGreen.black(`[${statusCode.status()}] ${url}`));
+            console.log(
+              chalk.bgYellowBright.black(`[${statusCode.status()}] ${url}`),
+            );
           }
           const screenshotFileName = `${url
             .replace(/[^a-z0-9]/gi, '_')
@@ -177,7 +180,9 @@ const WriteUrlAndSubdomains = async () => {
 
           const validatedUrls = [];
           const errorLinksArray = [];
-          console.log(chalk.bgYellow.black.bold(`Validando URLs WAYBACK...`));
+          console.log(
+            chalk.bgYellow.black.bold(`Validando URLs WAYBACK... ${url}`),
+          );
           for (const waybackUrl of waybackResponses) {
             try {
               const waybackResponse = await fetch(waybackUrl);
@@ -190,23 +195,47 @@ const WriteUrlAndSubdomains = async () => {
                 waybackResponse.status === 308 ||
                 waybackResponse.status === 202
               ) {
-                console.log(
-                  chalk.bgGreen.black(
-                    `[${waybackResponse.status}] ${waybackUrl}`,
-                  ),
-                );
                 validatedUrls.push(waybackUrl);
               } else {
-                console.log(
-                  chalk.bgRed.black(
-                    `[${waybackResponse.status}] ${waybackUrl}`,
-                  ),
-                );
                 errorLinksArray.push(waybackUrl);
               }
             } catch (error) {
               console.error('Erro ao validar URL WAYBACK:', waybackUrl, error);
             }
+          }
+          console.log(
+            chalk.bgYellow.black.bold(`COMEÇANDO BRUTE FORCE... ${url}`),
+          );
+          const bruteForceSuccess = [];
+          const bruteForceFail = [];
+          if (fs.existsSync(wordlist)) {
+            const wordlistContent = fs
+              .readFileSync(wordlist, 'utf8')
+              .split('\r\n')
+              .filter((url) => url.trim() !== '');
+            for (const word of wordlistContent) {
+              const urlWithWord = `${url}/${word}`;
+              try {
+                const response = await fetch(urlWithWord);
+                if (
+                  response.status === 200 ||
+                  response.status === 301 ||
+                  response.status === 302 ||
+                  response.status === 303 ||
+                  response.status === 307 ||
+                  response.status === 308
+                ) {
+                  bruteForceSuccess.push(urlWithWord);
+                } else {
+                  bruteForceFail.push(urlWithWord);
+                }
+              } catch (error) {
+                console.log(error);
+              }
+            }
+          } else {
+            console.log(chalk.bgRed.black(`[ERRO] CRIE UM ARQUIVO wl.txt`));
+            return;
           }
 
           const responseObj = {
@@ -215,6 +244,8 @@ const WriteUrlAndSubdomains = async () => {
             screenshotPath: `../${screenshotPath}`,
             waybackResponses: validatedUrls,
             errorLinks: errorLinksArray,
+            bruteForceSuccess,
+            bruteForceFail,
           };
           responses.all.push(responseObj);
         } catch (error) {

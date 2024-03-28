@@ -143,6 +143,7 @@ let htmlCode = `<!DOCTYPE html>
                width: 100%;
                gap: 50px;
           }
+   
      </style>
 </head>
 <body>

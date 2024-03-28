@@ -34,6 +34,11 @@ Essa ferramenta é uma solução abrangente para a obtenção e organização de
   node index.js
 ```
 
+## Brute force e DNS enumerate
+
+- Se você for fazer enumeração de DNS crie um arquivo "subdomain.txt" na raiz do proejto.
+- Se você for fazer brute force em diretórios crie um arquivo "wl.txt" na raiz do projeto.
+
 ## Desenvolvedor
 
 - [@ek1l](https://www.github.com/ek1l)

@@ -2,4 +2,9 @@ node_modules
 response
 screenshots
 html
-
+.vscode
+./html/*
+./html
+url.txt
+wl.txt
+subdomain.txt

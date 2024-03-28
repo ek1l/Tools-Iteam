@@ -2,7 +2,9 @@
 
 ![App Screenshot](https://i.imgur.com/UuTS6Tl.png)
 
-# It.eam Tools Red Team
+![App Screenshot](https://i.imgur.com/hgtNPS9.png)
+
+# It.eam Tools - Red Team
 
 Desenvolvi uma aplicação para automatizar e agilizar o processo de OSINT (Open-Source Intelligence). Essa ferramenta é capaz de realizar uma série de tarefas automaticamente. Primeiramente, ela acessa o Wayback Machine e busca todas as URLs relacionadas ao site fornecido. Em seguida, valida cada uma dessas URLs, oferecendo a opção de realizar enumeração de DNS e brute force de diretórios, conforme necessário.
 
@@ -21,6 +23,16 @@ Essa ferramenta é uma solução abrangente para a obtenção e organização de
 - HTML5
 - CSS3
 - Javascript
+
+## Como baixar a ferramenta
+
+- Clone o repositório: https://github.com/ek1l/Tools-Iteam.git
+
+```bash
+  cd Tools-Iteam
+  npm install
+  node index.js
+```
 
 ## Desenvolvedor
 

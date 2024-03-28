@@ -171,7 +171,9 @@ const WriteUrlAndSubdomains = async () => {
               const data = await response.json();
               return data.slice(1).map((entry) => entry[0]);
             } catch (error) {
-              console.log('Erro ao buscar dados na API Wayback', error);
+              console.log(
+                chalk.bgRed.black('Erro ao buscar dados na API Wayback'),
+              );
               return [];
             }
           };
@@ -234,8 +236,11 @@ const WriteUrlAndSubdomains = async () => {
               }
             }
           } else {
-            console.log(chalk.bgRed.black(`[ERRO] CRIE UM ARQUIVO wl.txt`));
-            return;
+            console.log(
+              chalk.bgRed.black(
+                `SE VOCÊ QUISER FAZER UM BRUTE FORCE CRIE UM ARQUIVO "wl.txt" NA RAIZ`,
+              ),
+            );
           }
 
           const responseObj = {

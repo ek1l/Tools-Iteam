@@ -98,6 +98,7 @@ const WriteUrlAndSubdomains = async () => {
       const htmlDir = './html';
       const jsonResponseHTML = 'db.json';
       const wordlist = './wl.txt';
+      const dnsDir = './subdomain.txt';
       const urls = txtFileContent
         .split('\n')
         .filter((url) => url.trim() !== '');
@@ -213,7 +214,7 @@ const WriteUrlAndSubdomains = async () => {
           if (fs.existsSync(wordlist)) {
             const wordlistContent = fs
               .readFileSync(wordlist, 'utf8')
-              .split('\r\n')
+              .split('\n')
               .filter((url) => url.trim() !== '');
             for (const word of wordlistContent) {
               const urlWithWord = `${url}/${word}`;
@@ -243,6 +244,62 @@ const WriteUrlAndSubdomains = async () => {
             );
           }
 
+          const dnsEnumSuccess = [];
+          const dnsEnumFail = [];
+          console.log(chalk.bgYellow.black.bold(`ENUMERANDO DNS... ${url}`));
+          if (fs.existsSync(dnsDir)) {
+            const wordlistContent = fs
+              .readFileSync(dnsDir, 'utf8')
+              .split('\n')
+              .filter((word) => word.trim() !== '');
+
+            for (const word of wordlistContent) {
+              let urlCorreta;
+              if (url.startsWith('https://')) {
+                urlCorreta = url.replace('https://', '');
+              } else if (url.startsWith('http://')) {
+                urlCorreta = url.replace('http://', '');
+              }
+              const urlEnumDns = `http://${word.trim()}.${urlCorreta.trim()}`;
+              try {
+                const response = await fetch(urlEnumDns);
+                if (
+                  response.status === 200 ||
+                  response.status === 301 ||
+                  response.status === 302 ||
+                  response.status === 303 ||
+                  response.status === 307 ||
+                  response.status === 308
+                ) {
+                  dnsEnumSuccess.push(urlEnumDns);
+                } else {
+                  dnsEnumFail.push(urlEnumDns);
+                }
+              } catch (error) {}
+            }
+          } else {
+            console.log(
+              chalk.bgRed.black(
+                `SE VOCÊ QUISER FAZER UMA ENUMERAÇÃO DE DNS CRIE UM ARQUIVO "subdomain.txt" NA RAIZ`,
+              ),
+            );
+          }
+          const whoisResponse = async (url) => {
+            try {
+              let urlHost = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_za3WA10yeBOW3fws3cKKtqyC2FkgO&domainName=${url}&outputFormat=JSON`;
+              const response = await fetch(urlHost);
+              const data = await response.json();
+              return data;
+            } catch (error) {
+              console.log(
+                chalk.bgRed.black('Erro ao buscar dados na API Whois'),
+              );
+              return [];
+            }
+          };
+
+          let whoisResponses = await whoisResponse(url);
+
           const responseObj = {
             url,
             statusCode: statusCode.status(),
@@ -251,7 +308,11 @@ const WriteUrlAndSubdomains = async () => {
             errorLinks: errorLinksArray,
             bruteForceSuccess,
             bruteForceFail,
+            dnsEnumSuccess,
+            dnsEnumFail,
+            whoisResponses: whoisResponses,
           };
+
           responses.all.push(responseObj);
         } catch (error) {
           console.log(chalk.bgRed.black(`[ERRO] ${url}`));
@@ -287,7 +348,7 @@ const WriteUrlAndSubdomains = async () => {
           }
           console.log(
             `Processos na porta ${port} encerrados com sucesso.\r\n SERVIDOR ABERTO EM http://localhost:${port}
-            ${chalk.bgYellow.black(
+            ${chalk.bgYellow.black.bold(
               'SE O SERVIDOR CAIR  OU  O TERMINAL FOR FECHADO ENTRE NESTE MESMO DIRETORIO E DIGITE "npm run server"',
             )}
             `,

@@ -8,7 +8,7 @@
     "server": "json-server --watch db.json"
   },
   "keywords": [],
-  "author": "",
+  "author": "Leonardo Duarte Melo Rocha <leonardoduarteprogramador@gmail.com> ",
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.0.0",

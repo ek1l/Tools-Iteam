@@ -5,7 +5,9 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const htmlCode = require('./htmlCode.js');
 const { exec } = require('child_process');
-console.log(`  ___  _                                                                                                     
+console.log(
+  chalk.black
+    .red(`  ___  _                                                                                                     
 |_ _|| |_     ___   __ _  _ __ ___                                                                          
  | | | __|   / _ \\ / _\` || '_ \` _ \\                                                                         
  | | | |_  _|  __/| (_| || | | | | |                                                                        
@@ -15,7 +17,8 @@ console.log(`  ___  _
 | |_) ||  _|  | | | |   | |  |  _|    / _ \\  | |\\/| |   | | | | | || | | || |    \\___ \\                     
 |  _ < | |___ | |_| |   | |  | |___  / ___ \\ | |  | |   | | | |_| || |_| || |___  ___) |                    
 |_| \\_\\|_____||____/    |_|  |_____|/_/   \\_\\|_|  |_|   |_|  \\___/  \\___/ |_____||____/                     
-`);
+`),
+);
 
 const operation = () => {
   inquirer

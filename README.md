@@ -12,6 +12,8 @@ Além disso, a aplicação utiliza a API do WHOIS para coletar todos os dados re
 
 Essa ferramenta é uma solução abrangente para a obtenção e organização de informações relevantes durante investigações de OSINT, oferecendo uma interface simples e eficiente para análise detalhada.
 
+Também tem a opção de geolocalizador de IP, onde ele busca todas informações do ip que você colocar e verifica a reputação no virustotal.com!
+
 ## Tecnologias
 
 - NodeJS

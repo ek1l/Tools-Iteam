@@ -27,7 +27,7 @@ const operation = () => {
         type: 'list',
         name: 'action',
         message: 'O que deseja fazer?',
-        choices: ['OSINT', 'Sair'],
+        choices: ['OSINT', 'GeoIp / Virus Total', 'Sair'],
       },
     ])
     .then((answer) => {
@@ -37,19 +37,21 @@ const operation = () => {
       } else if (action === 'Sair') {
         console.log(chalk.bgBlue.black('Saindo...'));
         process.exit();
+      } else if (action === 'GeoIp / Virus Total') {
+        geoIp();
       }
     })
     .catch((error) => console.log(error));
 };
 
 operation();
-
+// OSINT
 const urlAndSubDomainsValidator = () => {
   console.log(chalk.bgGreen.black('Loading...'));
 
   WriteUrlAndSubdomains();
 };
-
+// OSINT
 const WriteUrlAndSubdomains = async () => {
   inquirer
     .prompt([
@@ -384,6 +386,82 @@ const WriteUrlAndSubdomains = async () => {
           'WEBSERVER ONLINE! ABRA O ARQUIVO INDEX.HTML EM ./html/index.html PARA CONFERIR OS DETALHES DA BUSCA 🚀',
         ),
       );
+    })
+    .catch((error) => console.log(error));
+};
+
+// GEOIP
+
+const geoIp = () => {
+  console.log(chalk.bgGreen.black('Loading...'));
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'ip',
+        message: 'IP: ',
+      },
+    ])
+    .then(async (answer) => {
+      let ip = answer['ip'];
+
+      const response = await fetch(`http://ip-api.com/json/${ip}`);
+      const data = await response.json();
+
+      console.log(chalk.bgGreen.black(`[STATUS]: ${data.status}`));
+      console.log(chalk.bgGreen.black(`[COUNTRY]: ${data.country}`));
+      console.log(chalk.bgGreen.black(`[COUNTRYCODE]: ${data.countryCode}`));
+      console.log(chalk.bgGreen.black(`[REGION_NAME]: ${data.regionName}`));
+      console.log(chalk.bgGreen.black(`[CITY]: ${data.city}`));
+      console.log(chalk.bgGreen.black(`[ZIP]: ${data.zip}`));
+      console.log(chalk.bgGreen.black(`[LAT]: ${data.lat}`));
+      console.log(chalk.bgGreen.black(`[TIMEZONE]: ${data.timezone}`));
+      console.log(chalk.bgGreen.black(`[ISP]: ${data.isp}`));
+      console.log(chalk.bgGreen.black(`[ORG]: ${data.org}`));
+      console.log(chalk.bgGreen.black(`[AS]: ${data.as}`));
+      console.log(chalk.bgGreen.black(`[QUERY]: ${data.query}`));
+
+      console.log(chalk.bgYellow.black(`[VERIFICANDO IP NO VIRUSTOTAL]...`));
+
+      const responseVirusTotal = await fetch(
+        `https://www.virustotal.com/api/v3/ip_addresses/${ip}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'x-apikey':
+              'a605511c3829b20dff2a13ef52bd6bfd64780a229e715f9bfd7bc8725143e843',
+          },
+        },
+      );
+      const dataVirusTotal = await responseVirusTotal.json();
+
+      console.log(chalk.bgCyan.black(`[REPUTATION]:`));
+      console.log(
+        chalk.bgGreen.black(
+          `[MALICIOUS]: ${dataVirusTotal.data.attributes.last_analysis_stats.malicious}`,
+        ),
+      );
+      console.log(
+        chalk.bgGreen.black(
+          `[SUSPICIOUS]: ${dataVirusTotal.data.attributes.last_analysis_stats.suspicious}`,
+        ),
+      );
+      console.log(
+        chalk.bgGreen.black(
+          `[UNDETECTED]: ${dataVirusTotal.data.attributes.last_analysis_stats.undetected}`,
+        ),
+      );
+      console.log(
+        chalk.bgGreen.black(
+          `[HARMLESS]: ${dataVirusTotal.data.attributes.last_analysis_stats.harmless}`,
+        ),
+      );
+      console.log(
+        chalk.bgGreen.black(
+          `[TIMEOUT]: ${dataVirusTotal.data.attributes.last_analysis_stats.timeout}`,
+        ),
+      );
+      operation();
     })
     .catch((error) => console.log(error));
 };

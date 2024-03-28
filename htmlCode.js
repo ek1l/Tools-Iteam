@@ -4,7 +4,7 @@ let htmlCode = `<!DOCTYPE html>
 <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>It.eam Tools - URL/SUBDOMAINS VALIDATOR</title>
+     <title>Red Team Tools - OSINT</title>
      <style>
           @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
@@ -174,7 +174,7 @@ let htmlCode = `<!DOCTYPE html>
      <div class="titleAndLogo">
           <a href="./index.html"><img src="https://it-eam.com/wp-content/uploads/2016/12/Logo-iT.eam_.png" alt="Logo Iteam"></a>
           <h1 class="red-team">RED TEAM TOOLS</h1>
-          <h1 class="url_subdomains_title">URL / SUBDOMAINS VALIDATOR</h1>
+          <h1 class="url_subdomains_title">OSINT</h1>
      </div>
      <div id="root"></div>
      <script>

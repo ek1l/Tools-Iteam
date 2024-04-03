@@ -4,7 +4,10 @@ const fs = require('fs');
 const puppeteer = require('puppeteer');
 const path = require('path');
 const htmlCode = require('./htmlCode.js');
+const io = require('socket.io-client');
 const { exec } = require('child_process');
+const net = require('net');
+
 console.log(
   chalk.black
     .red(`  ___  _                                                                                                     
@@ -27,7 +30,13 @@ const operation = () => {
         type: 'list',
         name: 'action',
         message: 'O que deseja fazer?',
-        choices: ['OSINT', 'GeoIp / Virus Total', 'Sair'],
+        choices: [
+          'OSINT',
+          'GeoIp / Virus Total',
+          'Port Scanner',
+          'Indentificar o tipo de hash',
+          'Sair',
+        ],
       },
     ])
     .then((answer) => {
@@ -39,6 +48,10 @@ const operation = () => {
         process.exit();
       } else if (action === 'GeoIp / Virus Total') {
         geoIp();
+      } else if (action === 'Port Scanner') {
+        portScanner();
+      }else if(action === 'Indentificar o tipo de hash'){
+        hashType();
       }
     })
     .catch((error) => console.log(error));
@@ -391,7 +404,6 @@ const WriteUrlAndSubdomains = async () => {
 };
 
 // GEOIP
-
 const geoIp = () => {
   console.log(chalk.bgGreen.black('Loading...'));
   inquirer
@@ -461,6 +473,63 @@ const geoIp = () => {
           `[TIMEOUT]: ${dataVirusTotal.data.attributes.last_analysis_stats.timeout}`,
         ),
       );
+      operation();
+    })
+    .catch((error) => console.log(error));
+};
+// PORTSCANNER
+const portScanner = async () => {
+  console.log(chalk.bgGreen.black('Loading...'));
+  const answer = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'ip',
+      message: 'IP:',
+    },
+  ]);
+  const ip = answer.ip;
+  console.log(chalk.bgGreen.black(`Verificando 65535 portas...`));
+  for (let i = 0; i < 65535; i++) {
+    await checkPort(ip, i);
+  }
+};
+
+const checkPort = (ip, port) => {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    socket.setTimeout(1000);
+
+    socket.on('connect', () => {
+      console.log(chalk.bgGreen.black(`[PORTA]: ${port} Aberta`));
+      socket.destroy();
+      resolve();
+    });
+
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve();
+    });
+
+    socket.on('error', (err) => {
+      resolve();
+    });
+
+    socket.connect(port, ip);
+  });
+};
+//HASH IDENTIFIER
+const hashType = () => {
+  console.log(chalk.bgGreen.black('Loading...'));
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'hash',
+        message: 'Hash: ',
+      },
+    ])
+    .then((answer) => {
+      const hash = answer['hash'];
       operation();
     })
     .catch((error) => console.log(error));

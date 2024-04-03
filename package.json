@@ -13,8 +13,12 @@
   "dependencies": {
     "chalk": "^4.0.0",
     "child_process": "^1.0.2",
+    "hash-identifier": "^1.0.1",
     "inquirer": "^3.3.0",
     "json-server": "^1.0.0-alpha.23",
-    "puppeteer": "^22.6.1"
+    "portscanner": "^2.2.0",
+    "puppeteer": "^22.6.1",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
   }
 }
